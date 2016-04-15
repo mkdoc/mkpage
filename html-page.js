@@ -111,7 +111,8 @@ function head(chunk, cb) {
 
   // meta elements
   for(k in this.meta) {
-    html.literal += tag('meta', {name: k, content: this.meta[k]}, false, true);
+    html.literal +=
+      tag('meta', {name: k, content: this.meta[k]}, false, true);
   }
 
   // close head
