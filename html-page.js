@@ -1,5 +1,27 @@
 var through = require('through3')
-  //, Node = require('mkast').Node;
+  , Node = require('mkast').Node;
+
+function tag(name, attrs, close, terminates) {
+  if(typeof attrs === 'boolean') {
+    close = attrs; 
+    attrs = null;
+  }
+  if(close) {
+    return '</' + name + '>';
+  }
+
+  var str = '<' + name;
+  for(var k in attrs) {
+    str += ' ' + k + '="' + attrs[k] + '"';
+  }
+
+  if(terminates) {
+    str += ' /';
+  }
+  str += '>';
+
+  return str;
+}
 
 /**
  *  Wraps a document stream with HTML code blocks for the document head, 
@@ -15,6 +37,7 @@ var through = require('through3')
  *
  *  @option {String} doctype document type declaration.
  *  @option {String=en-us} lang language attribute for the html element.
+ *  @option {String=utf-8} charset document character set.
  *  @option {String} title document title.
  *  @option {Array} style paths for link elements.
  *  @option {Array} script paths for script elements.
@@ -36,6 +59,7 @@ function HtmlPage(opts) {
 
   this.doctype = opts.doctype || '<!doctype html>';
   this.lang = opts.lang || 'en-us';
+  this.charset = opts.charset || 'utf-8';
 
   this.title = opts.title;
   this.style = opts.style || [];
@@ -51,6 +75,9 @@ function HtmlPage(opts) {
   this.html = opts.html || {};
   this.meta = opts.meta || {};
   this.body = opts.body || {};
+
+  // configure lang attribute
+  this.html.lang = this.lang;
 
   this.element = opts.element;
   this.attr = opts.attr || {};
@@ -88,14 +115,42 @@ function transform(chunk, encoding, cb) {
 
 function head(chunk, cb) {
 
+  var doctype = Node.createNode(
+        Node.HTML_BLOCK, {_htmlBlockType: 4, literal: this.doctype})
+    , html = Node.createNode(
+        Node.HTML_BLOCK, {_htmlBlockType: 6});
+
+  html.literal = tag('html', this.html);
+  html.literal += tag('head');
+  html.literal += tag('meta', {charset: this.charset}, false, true);
+
+  // close head
+  html.literal += tag('head', true);
+
+  // open body
+  html.literal += tag('body', this.body);
+
+  this.push(doctype);
+  this.push(html);
+
   // pass through incoming data
   this.push(chunk);
-
   this._header = true;
   cb();
 }
 
 function foot(cb) {
+  var html = Node.createNode(
+        Node.HTML_BLOCK, {_htmlBlockType: 6, literal: ''});
+
+  // close body
+  html.literal += tag('body', true);
+
+  // close html
+  html.literal += tag('html', true);
+
+  this.push(html);
+
   this._footer = true;
   cb();
 }
