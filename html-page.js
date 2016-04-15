@@ -1,38 +1,6 @@
 var through = require('through3')
   , Node = require('mkast').Node;
 
-function esc(str, attr) {
-  var s = str.replace(/&/gm, '&amp;');
-  s = s.replace(/</gm, '&lt;');
-  s = s.replace(/>/gm, '&gt;');
-  if(attr) {
-    s = s.replace(/"/gm, '&quot;');
-  }
-  return s;
-}
-
-function tag(name, attrs, close, terminates) {
-  if(typeof attrs === 'boolean') {
-    close = attrs; 
-    attrs = null;
-  }
-  if(close) {
-    return '</' + name + '>';
-  }
-
-  var str = '<' + name;
-  for(var k in attrs) {
-    str += ' ' + k + '="' + esc(attrs[k], true) + '"';
-  }
-
-  if(terminates) {
-    str += ' /';
-  }
-  str += '>';
-
-  return str;
-}
-
 /**
  *  Wraps a document stream with HTML code blocks for the document head, 
  *  start of the body and the end of the body and document.
@@ -125,7 +93,8 @@ function transform(chunk, encoding, cb) {
 
 function head(chunk, cb) {
 
-  var doctype = Node.createNode(
+  var k
+    , doctype = Node.createNode(
         Node.HTML_BLOCK, {_htmlBlockType: 4, literal: this.doctype})
     , html = Node.createNode(
         Node.HTML_BLOCK, {_htmlBlockType: 6});
@@ -134,13 +103,16 @@ function head(chunk, cb) {
   html.literal += tag('head');
   html.literal += tag('meta', {charset: this.charset}, false, true);
 
-  console.error(this.title);
-
   html.literal += tag('title');
   if(this.title) {
     html.literal += esc(this.title);
   }
   html.literal += tag('title', true);
+
+  // meta elements
+  for(k in this.meta) {
+    html.literal += tag('meta', {name: k, content: this.meta[k]}, false, true);
+  }
 
   // close head
   html.literal += tag('head', true);
@@ -178,6 +150,38 @@ function flush(cb) {
     return this.foot(cb); 
   }
   cb();
+}
+
+function esc(str, attr) {
+  var s = str.replace(/&/gm, '&amp;');
+  s = s.replace(/</gm, '&lt;');
+  s = s.replace(/>/gm, '&gt;');
+  if(attr) {
+    s = s.replace(/"/gm, '&quot;');
+  }
+  return s;
+}
+
+function tag(name, attrs, close, terminates) {
+  if(typeof attrs === 'boolean') {
+    close = attrs; 
+    attrs = null;
+  }
+  if(close) {
+    return '</' + name + '>';
+  }
+
+  var str = '<' + name;
+  for(var k in attrs) {
+    str += ' ' + k + '="' + esc(attrs[k], true) + '"';
+  }
+
+  if(terminates) {
+    str += ' /';
+  }
+  str += '>';
+
+  return str;
 }
 
 HtmlPage.prototype.head = head;
