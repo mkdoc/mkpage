@@ -19,7 +19,7 @@ function page(opts, cb) {
   opts.input = opts.input;
   opts.output = opts.output;
 
-  var stream = new HtmlPage();
+  var stream = new HtmlPage(opts);
 
   if(!opts.input || !opts.output) {
     return stream; 
