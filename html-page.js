@@ -94,6 +94,8 @@ function transform(chunk, encoding, cb) {
 function head(chunk, cb) {
 
   var k
+    , attrs
+    , async = this.async
     , doctype = Node.createNode(
         Node.HTML_BLOCK, {_htmlBlockType: 4, literal: this.doctype})
     , html = Node.createNode(
@@ -114,6 +116,22 @@ function head(chunk, cb) {
     html.literal +=
       tag('meta', {name: k, content: this.meta[k]}, false, true);
   }
+
+  this.style.forEach(function(href) {
+    html.literal += tag(
+      'link', {rel: 'stylesheet', type: 'text/css', href: href}, false, true);
+  })
+
+  this.script.forEach(function(src) {
+    attrs = {type: 'text/javascript', src: src};
+    if(async) {
+      attrs.async = async;
+    }
+    html.literal += tag(
+      'script', attrs);
+    html.literal += tag('script', true);
+  })
+
 
   // close head
   html.literal += tag('head', true);
@@ -174,7 +192,11 @@ function tag(name, attrs, close, terminates) {
 
   var str = '<' + name;
   for(var k in attrs) {
-    str += ' ' + k + '="' + esc(attrs[k], true) + '"';
+    str += ' ' + k;
+    // NOTE: when an attribute is true it is not given a value, eg: `async`
+    if(attrs[k] !== true && attrs[k] !== undefined) {
+      str += '="' + esc(attrs[k], true) + '"';
+    }
   }
 
   if(terminates) {
