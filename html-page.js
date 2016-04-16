@@ -176,7 +176,6 @@ function head(chunk, cb) {
 
   // run async functions
   if(sequence.length) {
-
     this.sequence(sequence, onSequence);
   // finalize header
   }else{
