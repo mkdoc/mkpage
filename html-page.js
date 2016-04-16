@@ -1,4 +1,5 @@
 var through = require('through3')
+  , fs = require('fs')
   , Node = require('mkast').Node;
 
 /**
@@ -132,7 +133,74 @@ function head(chunk, cb) {
       tag('script', {type: 'text/javascript', src: href, async: this.async})));
   }
 
-  this.header(chunk, cb);
+  var sequence = [];
+
+  function load(file, cb) {
+    var scope = this;
+    fs.readFile(file, function(err, contents) {
+      if(err) {
+        return cb.call(scope, err); 
+      }
+
+      contents = '' + contents;
+      if(!/^\n/.test(contents)) {
+        contents = '\n' + contents;
+      }
+      if(!/\n$/.test(contents)) {
+        contents = contents + '\n';
+      }
+
+      cb.call(scope, null, contents); 
+    })
+  }
+
+  function css(cb) {
+    var file = this.css;
+    load.call(this, file, function(err, contents) {
+      if(err) {
+        return cb(err); 
+      }
+      this.push(element(
+        tag('style') + esc(contents) + tag('style', true)));
+      cb();
+    })
+  }
+
+  function js(cb) {
+    var file = this.javascript;
+    load.call(this, file, function(err, contents) {
+      if(err) {
+        return cb(err); 
+      }
+      this.push(element(
+        tag('script') + esc(contents) + tag('script', true)));
+      cb();
+    })
+  }
+
+  function onSequence(err) {
+    if(err) {
+      return cb(err); 
+    } 
+    this.header(chunk, cb);
+  }
+
+  if(this.css) {
+    sequence.push(css); 
+  }
+
+  if(this.javascript) {
+    sequence.push(js); 
+  }
+
+  // run async functions
+  if(sequence.length) {
+
+    this.sequence(sequence, onSequence);
+  // finalize header
+  }else{
+    this.header(chunk, cb);
+  }
 }
 
 /**
@@ -188,6 +256,21 @@ function footer(cb) {
   this.push(Node.createNode(Node.EOF));
   this._footer = true;
   cb();
+}
+
+function sequence(list, cb) {
+  var scope = this;
+  function next(err) {
+    if(err) {
+      return cb.call(scope, err); 
+    }
+    var item = list.shift();
+    if(!item) {
+      return cb.call(scope); 
+    }
+    item.call(scope, next);
+  }
+  next();
 }
 
 function flush(cb) {
@@ -264,5 +347,6 @@ HtmlPage.prototype.head = head;
 HtmlPage.prototype.header = header;
 HtmlPage.prototype.foot = foot;
 HtmlPage.prototype.footer = footer;
+HtmlPage.prototype.sequence = sequence;
 
 module.exports = through.transform(transform, flush, {ctor: HtmlPage})
