@@ -163,7 +163,9 @@ function head(chunk, cb) {
 }
 
 function foot(cb) {
-  var html = Node.createNode(
+  var attrs
+    , async = this.async
+    , html = Node.createNode(
         Node.HTML_BLOCK, {_htmlBlockType: 6, literal: ''});
 
   // add container element
@@ -173,6 +175,16 @@ function foot(cb) {
     el.literal = tag(this.element, true);
     this.push(el);
   }
+
+  // inject app script elements before close of body
+  this.app.forEach(function(src) {
+    attrs = {type: 'text/javascript', src: src};
+    if(async) {
+      attrs.async = async;
+    }
+    html.literal += tag('script', attrs);
+    html.literal += tag('script', true);
+  })
 
   // close body
   html.literal += tag('body', true);
