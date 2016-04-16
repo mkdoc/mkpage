@@ -83,7 +83,7 @@ Options
   -h, --help              Display help and exit
   --version               Print the version and exit
 
-mkpage@1.0.0
+mkpage@1.0.1
 ```
 
 ## API
