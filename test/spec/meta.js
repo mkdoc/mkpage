@@ -25,7 +25,9 @@ describe('mkpage:', function() {
           meta: {
             keywords: 'brochure, boutique'
           },
-          favicon: '/favicon.png'
+          favicon: '/favicon.png',
+          style: ['style.css'],
+          script: ['script.js']
         };
     
     mkpage(opts);
@@ -38,6 +40,15 @@ describe('mkpage:', function() {
       expect(result[7].literal)
         .to.eql(
           '<link rel="shortcut icon" type="image/png" href="/favicon.png" />');
+      expect(result[8].literal)
+        .to.eql(
+          '<link rel="stylesheet" type="text/css" href="style.css" />');
+      expect(result[9].literal)
+        .to.eql(
+          '<script type="text/javascript" src="script.js"></script>');
+      expect(result[10].literal)
+        .to.eql(
+          '</head>');
       done();
     })
   });

@@ -83,6 +83,11 @@ function HtmlPage(opts) {
 
   this.async = opts.async !== undefined ? Boolean(opts.async) : false;
 
+  if(!this.async) {
+    // need it to be undefined
+    delete this.async; 
+  }
+
   this.html = opts.html || {};
   this.meta = opts.meta || {};
   this.body = opts.body || {};
@@ -162,7 +167,8 @@ function head(chunk, cb) {
   for(i = 0;i < this.script.length;i++) {
     href = this.script[i];
     this.push(element(
-      tag('script', {type: 'text/javascript', src: href, async: this.async})));
+      tag('script', {type: 'text/javascript', src: href, async: this.async})
+        + tag('script', true)));
   }
 
   var sequence = [];
@@ -383,10 +389,12 @@ function tag(name, attrs, close, terminates) {
 
   var str = '<' + name;
   for(var k in attrs) {
-    str += ' ' + k;
-    // NOTE: when an attribute is true it is not given a value, eg: `async`
-    if(attrs[k] !== true && attrs[k] !== undefined) {
-      str += '="' + esc(attrs[k], true) + '"';
+    if(attrs[k] !== undefined) {
+      str += ' ' + k;
+      // NOTE: when an attribute is true it is not given a value, eg: `async`
+      if(attrs[k] !== true) {
+        str += '="' + esc('' + attrs[k], true) + '"';
+      }
     }
   }
 
