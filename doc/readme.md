@@ -12,6 +12,8 @@ Converts a markdown document stream to a full HTML page with html, head and body
 <!-- @toc -->
 ***
 
+<? @include {=readme} example.md ?>
+
 ## Usage
 
 Create the stream and write a [commonmark][] document:
