@@ -192,6 +192,7 @@ function head(chunk, cb) {
  *  @param {Function} cb callback function.
  */
 function header(chunk, cb) {
+  var scope = this;
 
   // close head
   this.push(element(tag('head', true)));
@@ -199,7 +200,18 @@ function header(chunk, cb) {
   // open body
   this.push(element(tag('body', this.body)));
 
-  this.finalize(chunk, cb);
+  // parse a header file into the stream
+  if(this.headFile) {
+    this.parse(this.headFile, function(err) {
+      if(err) {
+        return cb(err); 
+      } 
+      // finalize the header
+      scope.finalize(chunk, cb);
+    });
+  }else{
+    this.finalize(chunk, cb);
+  }
 }
 
 
