@@ -40,7 +40,7 @@ mkcat README.md | mkpage --title=README | mkout -H > README.html
 Use a stylesheet:
 
 ```shell
-mkcat README.md | mkpage --style=/assets/css/style.css | mkout -H > README.html
+mkcat README.md | mkpage --title=README --style=/style.css | mkout -H > README.html
 ```
 
 ## Usage
