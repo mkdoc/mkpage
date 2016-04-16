@@ -12,6 +12,37 @@ var through = require('through3')
  *  this case you can use the `attr` map to set attributes on the container 
  *  element.
  *
+ *  The `meta` option allows setting `<meta name="" content="" />` elements in 
+ *  the head of the document; for example keywords or author information.
+ *
+ *  Both the `header` and `footer` options are file paths; when specified the 
+ *  files are loaded and parsed as markdown.
+ *
+ *  The data from the header file is written after the body element but before 
+ *  any container element. The data for the footer file is written after any 
+ *  container element and before the end of the body element.
+ *
+ *  If the `title` option is not given no title element is created.
+ *
+ *  The `style` and `script` options correspond to `link` and `script` elements 
+ *  created in the head of the document, each entry should be the URL to use 
+ *  for the `href` or `src` attribute.
+ *
+ *  When the `favicon` option is given it is a URL to an image to use as a 
+ *  shortcut icon, the path should have a `.png` or `.ico` extension so that 
+ *  the MIME type may be determined.
+ *
+ *  If the `async` option is given all `script` elements are given the `async` 
+ *  attribute.
+ *
+ *  The `app` array lists URLs for script elements to create just before the 
+ *  body element is closed; these script elements when given are guaranteed to 
+ *  be the final elements before the body element is closed (after any footer or 
+ *  container element).
+ *
+ *  You can set attributes on the html and body elements using the `html` and 
+ *  `body` options.
+ *
  *  @module {constructor} HtmlPage
  *  @param {Object} [opts] stream options.
  *
@@ -213,7 +244,6 @@ function header(chunk, cb) {
     this.finalize(chunk, cb);
   }
 }
-
 
 /**
  *  Finalize the page header.
