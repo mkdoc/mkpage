@@ -62,8 +62,8 @@ function HtmlPage(opts) {
 
   this.app = opts.app || [];
 
-  this.header = opts.header;
-  this.footer = opts.footer;
+  this.headFile = opts.header;
+  this.footFile = opts.footer;
 
   // internal state
   this._header = false;
@@ -86,74 +86,73 @@ function transform(chunk, encoding, cb) {
   }
 
   // pass through incoming data
-  this.push(chunk);
-
-  cb();
+  cb(null, chunk);
 }
 
 function head(chunk, cb) {
-
-  var k
-    , attrs
-    , async = this.async
+  var i
+    , href
     , doctype = Node.createNode(
-        Node.HTML_BLOCK, {_htmlBlockType: 4, literal: this.doctype})
-    , html = Node.createNode(
-        Node.HTML_BLOCK, {_htmlBlockType: 6});
+        Node.HTML_BLOCK, {_htmlBlockType: 4, literal: this.doctype});
 
-  html.literal = tag('html', this.html);
-  html.literal += tag('head');
-  html.literal += ctag('meta', {charset: this.charset});
+  // open containing parent document
+  this.push(Node.createNode(Node.DOCUMENT));
 
-  html.literal += tag('title');
+  this.push(doctype);
+
+  this.push(element(tag('html', this.html)));
+  this.push(element(tag('head')));
+
+  this.push(element(ctag('meta', {charset: this.charset})));
+
   if(this.title) {
-    html.literal += esc(this.title);
+    this.push(element(tag('title') + esc(this.title) + tag('title', true)));
   }
-  html.literal += tag('title', true);
 
   // meta elements
-  for(k in this.meta) {
-    html.literal +=
-      tag('meta', {name: k, content: this.meta[k]},
-      false, true);
+  for(var k in this.meta) {
+    this.push(element(ctag('meta', {name: k, content: this.meta[k]})));
   }
 
   if(this.favicon) {
-    html.literal += ctag(
+    this.push(element(ctag(
       'link',
-      {rel: 'shortcut icon', type: mime(this.favicon), href: this.favicon});
+      {rel: 'shortcut icon', type: mime(this.favicon), href: this.favicon})));
   }
 
-  this.style.forEach(function(href) {
-    html.literal += ctag(
-      'link', {rel: 'stylesheet', type: 'text/css', href: href});
-  })
+  for(i = 0;i < this.style.length;i++) {
+    href = this.style[i];
+    this.push(element(ctag(
+      'link', {rel: 'stylesheet', type: 'text/css', href: href})));
+  }
 
-  this.script.forEach(function(src) {
-    attrs = {type: 'text/javascript', src: src};
-    if(async) {
-      attrs.async = async;
-    }
-    html.literal += tag(
-      'script', attrs);
-    html.literal += tag('script', true);
-  })
+  for(i = 0;i < this.script.length;i++) {
+    href = this.script[i];
+    this.push(element(
+      tag('script', {type: 'text/javascript', src: href, async: this.async})));
+  }
+
+  this.header(chunk, cb);
+}
+
+/**
+ *  Finalize the page header.
+ *
+ *  @function header
+ *  @param {Object} chunk chunk to passthrough.
+ *  @param {Function} cb callback function.
+ */
+function header(chunk, cb) {
 
   // close head
-  html.literal += tag('head', true);
+  this.push(element(tag('head', true)));
 
   // open body
-  html.literal += tag('body', this.body);
-
-  this.push(doctype);
-  this.push(html);
+  this.push(element(tag('body', this.body)));
 
   // add container element
   if(this.element) {
-    var el = Node.createNode(
-        Node.HTML_BLOCK, {_htmlBlockType: 6});
-    el.literal = tag(this.element, this.attr);
-    this.push(el);
+    this.push(element(tag(this.element, this.attr)));
   }
 
   // pass through incoming data
@@ -163,37 +162,30 @@ function head(chunk, cb) {
 }
 
 function foot(cb) {
-  var attrs
-    , async = this.async
-    , html = Node.createNode(
-        Node.HTML_BLOCK, {_htmlBlockType: 6, literal: ''});
-
-  // add container element
+  // close container element
   if(this.element) {
-    var el = Node.createNode(
-        Node.HTML_BLOCK, {_htmlBlockType: 6});
-    el.literal = tag(this.element, true);
-    this.push(el);
+    this.push(element(tag(this.element, true)));
   }
+  this.footer(cb);
+
+}
+
+function footer(cb) {
+  var i
+    , href;
 
   // inject app script elements before close of body
-  this.app.forEach(function(src) {
-    attrs = {type: 'text/javascript', src: src};
-    if(async) {
-      attrs.async = async;
-    }
-    html.literal += tag('script', attrs);
-    html.literal += tag('script', true);
-  })
+  for(i = 0;i < this.app.length;i++) {
+    href = this.app[i];
+    this.push(element(
+      tag('script', {type: 'text/javascript', src: href, async: this.async})));
+  }
 
-  // close body
-  html.literal += tag('body', true);
+  this.push(element(tag('body', true)));
+  this.push(element(tag('html', true)));
 
-  // close html
-  html.literal += tag('html', true);
-
-  this.push(html);
-
+  // close containing parent document
+  this.push(Node.createNode(Node.EOF));
   this._footer = true;
   cb();
 }
@@ -261,7 +253,16 @@ function tag(name, attrs, close, terminates) {
   return str;
 }
 
+function element(literal, type) {
+  literal = literal || '';
+  type = type || 6;
+  return Node.createNode(
+    Node.HTML_BLOCK, {_htmlBlockType: type, literal: literal});
+}
+
 HtmlPage.prototype.head = head;
+HtmlPage.prototype.header = header;
 HtmlPage.prototype.foot = foot;
+HtmlPage.prototype.footer = footer;
 
 module.exports = through.transform(transform, flush, {ctor: HtmlPage})
