@@ -31,6 +31,7 @@ function page(opts, cb) {
     .pipe(opts.output);
 
   if(cb) {
+    stream.once('error', cb);
     opts.output
       .once('error', cb)
       .once('finish', cb);

@@ -37,8 +37,8 @@ var through = require('through3')
  *
  *  The `app` array lists URLs for script elements to create just before the 
  *  body element is closed; these script elements when given are guaranteed to 
- *  be the final elements before the body element is closed (after any footer or 
- *  container element).
+ *  be the final elements before the body element is closed (after any footer 
+ *  or container element).
  *
  *  You can set attributes on the html and body elements using the `html` and 
  *  `body` options.
@@ -105,7 +105,6 @@ function HtmlPage(opts) {
 
   // internal state
   this._header = false;
-  this._footer = false;
 }
 
 /**
@@ -270,7 +269,7 @@ function finalize(chunk, cb) {
   cb();
 }
 
-function foot(cb) {
+function flush(cb) {
   var scope = this;
   // close container element
   if(this.element) {
@@ -308,7 +307,6 @@ function footer(cb) {
 
   // close containing parent document
   this.push(Node.createNode(Node.EOF));
-  this._footer = true;
   cb();
 }
 
@@ -340,13 +338,6 @@ function parse(file, cb) {
     })
     stream.once('finish', cb);
   })
-}
-
-function flush(cb) {
-  if(!this._footer) {
-    return this.foot(cb); 
-  }
-  cb();
 }
 
 function esc(str, attr) {
@@ -416,7 +407,6 @@ function element(literal, type) {
 HtmlPage.prototype.head = head;
 HtmlPage.prototype.header = header;
 HtmlPage.prototype.finalize = finalize;
-HtmlPage.prototype.foot = foot;
 HtmlPage.prototype.footer = footer;
 HtmlPage.prototype.sequence = sequence;
 HtmlPage.prototype.parse = parse;
