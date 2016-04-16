@@ -299,7 +299,8 @@ function footer(cb) {
   for(i = 0;i < this.app.length;i++) {
     href = this.app[i];
     this.push(element(
-      tag('script', {type: 'text/javascript', src: href, async: this.async})));
+      tag('script', {type: 'text/javascript', src: href, async: this.async})
+        + tag('script', true)));
   }
 
   this.push(element(tag('body', true)));
@@ -407,7 +408,6 @@ function tag(name, attrs, close, terminates) {
 }
 
 function element(literal, type) {
-  literal = literal || '';
   type = type || 6;
   return Node.createNode(
     Node.HTML_BLOCK, {_htmlBlockType: type, literal: literal});
