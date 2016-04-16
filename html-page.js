@@ -103,7 +103,7 @@ function head(chunk, cb) {
 
   html.literal = tag('html', this.html);
   html.literal += tag('head');
-  html.literal += tag('meta', {charset: this.charset}, false, true);
+  html.literal += ctag('meta', {charset: this.charset});
 
   html.literal += tag('title');
   if(this.title) {
@@ -114,12 +114,19 @@ function head(chunk, cb) {
   // meta elements
   for(k in this.meta) {
     html.literal +=
-      tag('meta', {name: k, content: this.meta[k]}, false, true);
+      tag('meta', {name: k, content: this.meta[k]},
+      false, true);
+  }
+
+  if(this.favicon) {
+    html.literal += ctag(
+      'link',
+      {rel: 'shortcut icon', type: mime(this.favicon), href: this.favicon});
   }
 
   this.style.forEach(function(href) {
-    html.literal += tag(
-      'link', {rel: 'stylesheet', type: 'text/css', href: href}, false, true);
+    html.literal += ctag(
+      'link', {rel: 'stylesheet', type: 'text/css', href: href});
   })
 
   this.script.forEach(function(src) {
@@ -131,7 +138,6 @@ function head(chunk, cb) {
       'script', attrs);
     html.literal += tag('script', true);
   })
-
 
   // close head
   html.literal += tag('head', true);
@@ -179,6 +185,26 @@ function esc(str, attr) {
     s = s.replace(/"/gm, '&quot;');
   }
   return s;
+}
+
+function mime(file) {
+  var ext = file.replace(/^([^\.]+)\.([^\.]+)$/, '$2')
+    , type;
+
+  switch(ext) {
+    case 'png':
+      type = 'image/png';
+      break;
+    case 'ico':
+      type = 'image/x-icon';
+      break;
+  }
+
+  return type;
+}
+
+function ctag(name, attrs) {
+  return tag(name, attrs, false, true); 
 }
 
 function tag(name, attrs, close, terminates) {
