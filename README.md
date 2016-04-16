@@ -47,19 +47,24 @@ ast.src('## Heading\n\nParagraph.')
 Usage: mkpage [options]
 
 Options
-  -o, --output=[FILE]     Write output to FILE (default: stdout)
   -d, --doctype=[VAL]     Doctype declaration (default: <!doctype html>)
+  -r, --charset=[VAL]     Document charset (default: utf-8)
   -l, --lang=[VAL]        Language attribute (default: en-us)
   -t, --title=[VAL]       Document title
-  -s, --style=[PATH...]   Stylesheets to use in document head
+  -s, --style=[PATH...]   Paths for link elements
+  -S, --script=[PATH...]  Paths for script elements
+  -c, --css=[FILE]        Create css element from FILE
+  -j, --javascript=[FILE] Create script element from FILE
   -f, --favicon=[PATH]    Path to use for a favicon
   --html-[ATTR]=[VAL...]  Set attributes on the html element
   --meta-[NAME]=[DESC...] Set meta data in document head
   --body-[ATTR]=[VAL...]  Set attributes on the body element
   --element=[NAME]        Container element for the input document
   --attr-[NAME]=[VAL...]  Set attributes on container element
+  --app=[PATH...]         Script elements before the end of the body
   --header=[FILE]         Include file at start of document body
   --footer=[FILE]         Include file at end of document body
+  --async                 Add async attribute to script elements
   -h, --help              Display help and exit
   --version               Print the version and exit
 
@@ -92,7 +97,7 @@ MIT
 
 ---
 
-Created by [mkdoc](https://github.com/mkdoc/mkdoc) on April 15, 2016
+Created by [mkdoc](https://github.com/mkdoc/mkdoc) on April 16, 2016
 
 [mkdoc]: https://github.com/mkdoc/mkdoc
 [mkparse]: https://github.com/mkdoc/mkparse
