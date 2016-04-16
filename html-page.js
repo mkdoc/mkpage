@@ -135,47 +135,28 @@ function head(chunk, cb) {
 
   var sequence = [];
 
-  function load(file, cb) {
-    var scope = this;
-    fs.readFile(file, function(err, contents) {
-      if(err) {
-        return cb.call(scope, err); 
-      }
+  function loader(name, file) {
+    return function load(cb) {
+      var scope = this;
+      fs.readFile(file, function(err, contents) {
+        if(err) {
+          return cb.call(scope, err); 
+        }
 
-      contents = '' + contents;
-      if(!/^\n/.test(contents)) {
-        contents = '\n' + contents;
-      }
-      if(!/\n$/.test(contents)) {
-        contents = contents + '\n';
-      }
+        contents = '' + contents;
+        if(!/^\n/.test(contents)) {
+          contents = '\n' + contents;
+        }
+        if(!/\n$/.test(contents)) {
+          contents = contents + '\n';
+        }
 
-      cb.call(scope, null, contents); 
-    })
-  }
+        scope.push(element(
+          tag(name) + esc(contents) + tag(name, true)));
 
-  function css(cb) {
-    var file = this.css;
-    load.call(this, file, function(err, contents) {
-      if(err) {
-        return cb(err); 
-      }
-      this.push(element(
-        tag('style') + esc(contents) + tag('style', true)));
-      cb();
-    })
-  }
-
-  function js(cb) {
-    var file = this.javascript;
-    load.call(this, file, function(err, contents) {
-      if(err) {
-        return cb(err); 
-      }
-      this.push(element(
-        tag('script') + esc(contents) + tag('script', true)));
-      cb();
-    })
+        cb(); 
+      })
+    }
   }
 
   function onSequence(err) {
@@ -186,11 +167,11 @@ function head(chunk, cb) {
   }
 
   if(this.css) {
-    sequence.push(css); 
+    sequence.push(loader('style', this.css)); 
   }
 
   if(this.javascript) {
-    sequence.push(js); 
+    sequence.push(loader('script', this.javascript)); 
   }
 
   // run async functions
