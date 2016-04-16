@@ -1,6 +1,7 @@
 var through = require('through3')
   , fs = require('fs')
-  , Node = require('mkast').Node;
+  , ast = require('mkast')
+  , Node = ast.Node;
 
 /**
  *  Wraps a document stream with HTML code blocks for the document head, 
@@ -184,10 +185,10 @@ function head(chunk, cb) {
 }
 
 /**
- *  Finalize the page header.
+ *  Complete the page header.
  *
  *  @function header
- *  @param {Object} chunk chunk to passthrough.
+ *  @param {Object} chunk node to pass through.
  *  @param {Function} cb callback function.
  */
 function header(chunk, cb) {
@@ -198,6 +199,18 @@ function header(chunk, cb) {
   // open body
   this.push(element(tag('body', this.body)));
 
+  this.finalize(chunk, cb);
+}
+
+
+/**
+ *  Finalize the page header.
+ *
+ *  @function finalize
+ *  @param {Object} chunk node to pass through.
+ *  @param {Function} cb callback function.
+ */
+function finalize(chunk, cb) {
   // add container element
   if(this.element) {
     this.push(element(tag(this.element, this.attr)));
@@ -210,12 +223,24 @@ function header(chunk, cb) {
 }
 
 function foot(cb) {
+  var scope = this;
   // close container element
   if(this.element) {
     this.push(element(tag(this.element, true)));
   }
-  this.footer(cb);
 
+  // parse a footer file into the stream
+  if(this.footFile) {
+    this.parse(this.footFile, function(err) {
+      if(err) {
+        return cb(err); 
+      } 
+      // finalize the footer
+      scope.footer(cb)
+    });
+  }else{
+    this.footer(cb);
+  }
 }
 
 function footer(cb) {
@@ -251,6 +276,21 @@ function sequence(list, cb) {
     item.call(scope, next);
   }
   next();
+}
+
+function parse(file, cb) {
+  var scope = this;
+  fs.readFile(file, function(err, contents) {
+    if(err) {
+      return cb(err); 
+    }
+    var stream = ast.src('' + contents);
+    stream.on('data', function(chunk) {
+      // pass through data
+      scope.push(chunk);
+    })
+    stream.once('finish', cb);
+  })
 }
 
 function flush(cb) {
@@ -325,8 +365,10 @@ function element(literal, type) {
 
 HtmlPage.prototype.head = head;
 HtmlPage.prototype.header = header;
+HtmlPage.prototype.finalize = finalize;
 HtmlPage.prototype.foot = foot;
 HtmlPage.prototype.footer = footer;
 HtmlPage.prototype.sequence = sequence;
+HtmlPage.prototype.parse = parse;
 
 module.exports = through.transform(transform, flush, {ctor: HtmlPage})
