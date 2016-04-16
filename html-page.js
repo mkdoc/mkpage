@@ -148,6 +148,14 @@ function head(chunk, cb) {
   this.push(doctype);
   this.push(html);
 
+  // add container element
+  if(this.element) {
+    var el = Node.createNode(
+        Node.HTML_BLOCK, {_htmlBlockType: 6});
+    el.literal = tag(this.element, this.attr);
+    this.push(el);
+  }
+
   // pass through incoming data
   this.push(chunk);
   this._header = true;
@@ -157,6 +165,14 @@ function head(chunk, cb) {
 function foot(cb) {
   var html = Node.createNode(
         Node.HTML_BLOCK, {_htmlBlockType: 6, literal: ''});
+
+  // add container element
+  if(this.element) {
+    var el = Node.createNode(
+        Node.HTML_BLOCK, {_htmlBlockType: 6});
+    el.literal = tag(this.element, true);
+    this.push(el);
+  }
 
   // close body
   html.literal += tag('body', true);
