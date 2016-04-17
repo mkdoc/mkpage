@@ -4,8 +4,11 @@ var through = require('through3')
   , Node = ast.Node;
 
 /**
- *  Wraps a document stream with HTML code blocks for the document head, 
- *  start of the body and the end of the body and document.
+ *  Wraps a document stream with HTML code blocks for the doctype, html, head 
+ *  and body element.
+ *
+ *  This implementation wraps the entire output in a DOCUMENT node which is 
+ *  terminated with an EOF after all output has been sent.
  *
  *  If the `element` option is given the input markdown document is wrapped in 
  *  a container element using the tag name given with the `element` option. In 
