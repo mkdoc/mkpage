@@ -22,5 +22,5 @@ Create the stream and write a [commonmark][] document:
 
 <? @include {=readme} help.md ?>
 
-<? @exec mkapi index.js --title=API --level=2 ?>
+<? @exec mkapi index.js html-page.js --title=API --level=2 ?>
 <? @include {=readme} license.md links.md ?>

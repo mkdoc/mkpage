@@ -25,6 +25,8 @@ For the command line interface install [mkdoc][] globally (`npm i -g mkdoc`).
 - [API](#api)
   - [page](#page)
     - [Options](#options)
+  - [HtmlPage](#htmlpage)
+    - [Options](#options-1)
 - [License](#license)
 
 ---
@@ -96,6 +98,8 @@ page([opts][, cb])
 
 Create an HTML page.
 
+See [HtmlPage](#htmlpage) for more options.
+
 Returns an output stream.
 
 * `opts` Object processing options.
@@ -106,13 +110,81 @@ Returns an output stream.
 * `input` Readable input stream.
 * `output` Writable output stream.
 
+### HtmlPage
+
+```javascript
+HtmlPage([opts])
+```
+
+Wraps a document stream with HTML code blocks for the document head,
+start of the body and the end of the body and document.
+
+If the `element` option is given the input markdown document is wrapped in
+a container element using the tag name given with the `element` option. In
+this case you can use the `attr` map to set attributes on the container
+element.
+
+The `meta` option allows setting `<meta name="" content="" />` elements in
+the head of the document; for example keywords or author information.
+
+Both the `header` and `footer` options are file paths; when specified the
+files are loaded and parsed as markdown.
+
+The data from the header file is written after the body element but before
+any container element. The data for the footer file is written after any
+container element and before the end of the body element.
+
+If the `title` option is not given no title element is created.
+
+The `style` and `script` options correspond to `link` and `script` elements
+created in the head of the document, each entry should be the URL to use
+for the `href` or `src` attribute.
+
+When the `favicon` option is given it is a URL to an image to use as a
+shortcut icon, the path should have a `.png` or `.ico` extension so that
+the MIME type may be determined.
+
+If the `async` option is given all `script` elements are given the `async`
+attribute.
+
+The `app` array lists URLs for script elements to create just before the
+body element is closed; these script elements when given are guaranteed to
+be the final elements before the body element is closed (after any footer
+or container element).
+
+You can set attributes on the html and body elements using the `html` and
+`body` options.
+
+* `opts` Object stream options.
+
+#### Options
+
+* `doctype` String document type declaration.
+* `lang` String=en-us language attribute for the html element.
+* `charset` String=utf-8 document character set.
+* `title` String document title.
+* `style` Array paths for link elements.
+* `script` Array paths for script elements.
+* `css` String file path to inline css contents.
+* `javascript` String file path to inline javascript contents.
+* `favicon` String path to use for a favicon link element.
+* `async` Boolean=false add async attribute to script elements.
+* `html` Object map of attributes for the html element.
+* `meta` Object map of name and descriptions for meta elements.
+* `body` Object map of attributes for the body element.
+* `element` String container element name.
+* `attr` Object map of attributes for the container element.
+* `app` Array paths for script elements before end of body.
+* `header` String include file at start of body.
+* `footer` String include file at end of body.
+
 ## License
 
 MIT
 
 ---
 
-Created by [mkdoc](https://github.com/mkdoc/mkdoc) on April 16, 2016
+Created by [mkdoc](https://github.com/mkdoc/mkdoc) on April 17, 2016
 
 [mkdoc]: https://github.com/mkdoc/mkdoc
 [mkparse]: https://github.com/mkdoc/mkparse

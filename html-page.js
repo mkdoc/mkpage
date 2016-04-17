@@ -113,9 +113,9 @@ function HtmlPage(opts) {
  *  @private {function} transform
  *  @member HtmlPage
  *
- *  @param {Array} node input AST node.
+ *  @param {Object} chunk input node.
  *  @param {String} encoding character encoding.
- *  @param {Function} callback function.
+ *  @param {Function} cb callback function.
  */
 function transform(chunk, encoding, cb) {
   if(!this._header) {
@@ -126,6 +126,18 @@ function transform(chunk, encoding, cb) {
   cb(null, chunk);
 }
 
+/**
+ *  Writes the initial part of the document head.
+ *
+ *  This creates a DOCUMENT node to encapsualate the entire output in a single 
+ *  document, the footer logic will terminate the document with an EOF.
+ *
+ *  @private {function} head
+ *  @member HtmlPage
+ *
+ *  @param {Object} chunk input node.
+ *  @param {Function} cb callback function.
+ */
 function head(chunk, cb) {
   var i
     , href
@@ -221,10 +233,13 @@ function head(chunk, cb) {
 }
 
 /**
- *  Complete the page header.
+ *  Completes the initial part of the document head injecting a document 
+ *  header after the open body element when necessary.
  *
- *  @function header
- *  @param {Object} chunk node to pass through.
+ *  @private {function} header
+ *  @member HtmlPage
+ *
+ *  @param {Object} chunk input node.
  *  @param {Function} cb callback function.
  */
 function header(chunk, cb) {
@@ -253,8 +268,10 @@ function header(chunk, cb) {
 /**
  *  Finalize the page header.
  *
- *  @function finalize
- *  @param {Object} chunk node to pass through.
+ *  @private {function} finalize
+ *  @member HtmlPage
+ *
+ *  @param {Object} chunk input node.
  *  @param {Function} cb callback function.
  */
 function finalize(chunk, cb) {
@@ -269,6 +286,15 @@ function finalize(chunk, cb) {
   cb();
 }
 
+/**
+ *  Write the page footer injecting a footer file before the body element 
+ *  is closed when necessary.
+ *
+ *  @private {function} flush
+ *  @member HtmlPage
+ *
+ *  @param {Function} cb callback function.
+ */
 function flush(cb) {
   var scope = this;
   // close container element
@@ -290,6 +316,15 @@ function flush(cb) {
   }
 }
 
+/**
+ *  Finalize the page footer output writing an EOF to terminate the 
+ *  encapsulating document.
+ *
+ *  @private {function} footer
+ *  @member HtmlPage
+ *
+ *  @param {Function} cb callback function.
+ */
 function footer(cb) {
   var i
     , href;
@@ -310,6 +345,16 @@ function footer(cb) {
   cb();
 }
 
+/**
+ *  Iterates a collection of functions asynchronously calling each function 
+ *  in series.
+ *
+ *  @private {function} sequence
+ *  @member HtmlPage
+ *
+ *  @param {Array} list collection of functions to call.
+ *  @param {Function} cb callback function.
+ */
 function sequence(list, cb) {
   var scope = this;
   function next(err) {
@@ -325,6 +370,15 @@ function sequence(list, cb) {
   next();
 }
 
+/**
+ *  Read and parse a markdown document into the stream.
+ *
+ *  @private {function} parse
+ *  @member HtmlPage
+ *
+ *  @param {String} file markdown file to load.
+ *  @param {Function} cb callback function.
+ */
 function parse(file, cb) {
   var scope = this;
   fs.readFile(file, function(err, contents) {
@@ -340,6 +394,14 @@ function parse(file, cb) {
   })
 }
 
+/**
+ *  Escapes values for embedding in an HTML document.
+ *
+ *  @private {function} esc
+ *
+ *  @param {String} str value to escape.
+ *  @param {Boolean} attr escape double quotes for attribute values.
+ */
 function esc(str, attr) {
   var s = str.replace(/&/gm, '&amp;');
   s = s.replace(/</gm, '&lt;');
@@ -350,10 +412,20 @@ function esc(str, attr) {
   return s;
 }
 
+/**
+ *  Looks up the MIME type for a favicon path.
+ *
+ *  Recognises the .png and .ico file extensions.
+ *
+ *  @private {function} mime
+ *
+ *  @param {String} file path to the file.
+ *  
+ *  @returns String mime type.
+ */
 function mime(file) {
   var ext = file.replace(/^([^\.]+)\.([^\.]+)$/, '$2')
     , type;
-
   switch(ext) {
     case 'png':
       type = 'image/png';
@@ -362,14 +434,35 @@ function mime(file) {
       type = 'image/x-icon';
       break;
   }
-
   return type;
 }
 
+/**
+ *  Create a self-closing HTML tag.
+ *
+ *  @private {function} ctag
+ *
+ *  @param {String} name element name.
+ *  @param {Object} attrs map of element attributes.
+ *  
+ *  @returns String element.
+ */
 function ctag(name, attrs) {
   return tag(name, attrs, false, true); 
 }
 
+/**
+ *  Create an open or close HTML tag.
+ *
+ *  @private {function} tag
+ *
+ *  @param {String} name element name.
+ *  @param {Object} attrs map of element attributes.
+ *  @param {Boolean} close create a closed element.
+ *  @param {Boolean} terminates self-closing open element.
+ *  
+ *  @returns String element.
+ */
 function tag(name, attrs, close, terminates) {
   if(typeof attrs === 'boolean') {
     close = attrs; 
@@ -398,6 +491,16 @@ function tag(name, attrs, close, terminates) {
   return str;
 }
 
+/**
+ *  Create an HTML_BLOCK node.
+ *
+ *  @private {function} element
+ *
+ *  @param {String} literal content for the html block node.
+ *  @param {Number} type html block type identifier.
+ *  
+ *  @returns Object node of the HTML_BLOCK type.
+ */
 function element(literal, type) {
   type = type || 6;
   return Node.createNode(

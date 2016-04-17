@@ -4,6 +4,8 @@ var ast = require('mkast')
 /**
  *  Create an HTML page.
  *
+ *  See [HtmlPage](#htmlpage) for more options.
+ *
  *  @function page
  *  @param {Object} [opts] processing options.
  *  @param {Function} [cb] callback function.
