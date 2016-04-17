@@ -73,6 +73,7 @@ Options
   -c, --css=[FILE]        Create style element from FILE
   -j, --javascript=[FILE] Create script element from FILE
   -f, --favicon=[PATH]    Path to use for a favicon
+  -m, --media=[VAL]       Set media attribute for stylesheets
   --html-[ATTR]=[VAL...]  Set attributes on the html element
   --meta-[NAME]=[DESC...] Set meta data in document head
   --body-[ATTR]=[VAL...]  Set attributes on the body element
@@ -171,6 +172,7 @@ You can set attributes on the html and body elements using the `html` and
 * `css` String file path to inline css contents.
 * `javascript` String file path to inline javascript contents.
 * `favicon` String path to use for a favicon link element.
+* `media` String stylesheet media attribute.
 * `async` Boolean=false add async attribute to script elements.
 * `html` Object map of attributes for the html element.
 * `meta` Object map of name and descriptions for meta elements.

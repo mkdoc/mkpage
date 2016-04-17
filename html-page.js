@@ -58,6 +58,7 @@ var through = require('through3')
  *  @option {String} css file path to inline css contents.
  *  @option {String} javascript file path to inline javascript contents.
  *  @option {String} favicon path to use for a favicon link element.
+ *  @option {String} media stylesheet media attribute.
  *  @option {Boolean=false} async add async attribute to script elements.
  *  @option {Object} html map of attributes for the html element.
  *  @option {Object} meta map of name and descriptions for meta elements.
@@ -85,6 +86,7 @@ function HtmlPage(opts) {
   this.favicon = opts.favicon;
 
   this.async = opts.async !== undefined ? Boolean(opts.async) : false;
+  this.media = opts.media;
 
   if(!this.async) {
     // need it to be undefined
@@ -175,7 +177,8 @@ function head(chunk, cb) {
   for(i = 0;i < this.style.length;i++) {
     href = this.style[i];
     this.push(element(ctag(
-      'link', {rel: 'stylesheet', type: 'text/css', href: href})));
+      'link', {
+        rel: 'stylesheet', type: 'text/css', media: this.media, href: href})));
   }
 
   for(i = 0;i < this.script.length;i++) {
@@ -187,7 +190,7 @@ function head(chunk, cb) {
 
   var sequence = [];
 
-  function loader(name, file) {
+  function loader(name, file, attrs) {
     return function load(cb) {
       var scope = this;
       fs.readFile(file, function(err, contents) {
@@ -204,7 +207,7 @@ function head(chunk, cb) {
         }
 
         scope.push(element(
-          tag(name) + esc(contents) + tag(name, true)));
+          tag(name, attrs) + esc(contents) + tag(name, true)));
 
         cb(); 
       })
@@ -219,7 +222,7 @@ function head(chunk, cb) {
   }
 
   if(this.css) {
-    sequence.push(loader('style', this.css)); 
+    sequence.push(loader('style', this.css, {media: this.media})); 
   }
 
   if(this.javascript) {
