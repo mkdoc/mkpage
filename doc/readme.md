@@ -12,15 +12,7 @@ Converts a markdown document stream to a full HTML page with html, head and body
 <!-- @toc -->
 ***
 
-<? @include {=readme} example.md ?>
-
-## Usage
-
-Create the stream and write a [commonmark][] document:
-
-<? @source {javascript=s/\.\.\/index/mkpage/gm} usage.js ?>
-
-<? @include {=readme} help.md ?>
+<? @include {=readme} example.md usage.md help.md ?>
 
 <? @exec mkapi index.js html-page.js --title=API --level=2 ?>
 <? @include {=readme} license.md links.md ?>
