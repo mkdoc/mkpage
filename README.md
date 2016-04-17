@@ -117,7 +117,7 @@ HtmlPage([opts])
 ```
 
 Wraps a document stream with HTML code blocks for the doctype, html, head
-and body element.
+and body elements.
 
 This implementation wraps the entire output in a DOCUMENT node which is
 terminated with an EOF after all output has been sent.
