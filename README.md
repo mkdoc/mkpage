@@ -63,6 +63,8 @@ ast.src('## Heading\n\nParagraph.')
 ```
 Usage: mkpage [options]
 
+  Convert a document to an HTML page.
+
 Options
   -d, --doctype=[VAL]     Doctype declaration (default: <!doctype html>)
   -r, --charset=[VAL]     Document charset (default: utf-8)
@@ -86,7 +88,7 @@ Options
   -h, --help              Display help and exit
   --version               Print the version and exit
 
-mkpage@1.0.2
+mkpage@1.0.3
 ```
 
 ## API
@@ -189,7 +191,7 @@ MIT
 
 ---
 
-Created by [mkdoc](https://github.com/mkdoc/mkdoc) on April 17, 2016
+Created by [mkdoc](https://github.com/mkdoc/mkdoc) on April 18, 2016
 
 [mkdoc]: https://github.com/mkdoc/mkdoc
 [mkparse]: https://github.com/mkdoc/mkparse

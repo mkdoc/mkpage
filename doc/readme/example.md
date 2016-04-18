@@ -11,3 +11,4 @@ Use a stylesheet:
 ```shell
 mkcat README.md | mkpage --title=README --style=style.css | mkhtml > README.html
 ```
+
