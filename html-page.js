@@ -62,6 +62,7 @@ var through = require('through3')
  *  @option {Boolean=false} async add async attribute to script elements.
  *  @option {Object} html map of attributes for the html element.
  *  @option {Object} meta map of name and descriptions for meta elements.
+ *  @option {Object} equiv map of name and content for meta http-equiv elements.
  *  @option {Object} body map of attributes for the body element.
  *  @option {String} element container element name.
  *  @option {Object} attr map of attributes for the container element.
@@ -95,6 +96,7 @@ function HtmlPage(opts) {
 
   this.html = opts.html || {};
   this.meta = opts.meta || {};
+  this.equiv = opts.equiv || {};
   this.body = opts.body || {};
 
   // configure lang attribute
@@ -145,6 +147,7 @@ function transform(chunk, encoding, cb) {
  */
 function head(chunk, cb) {
   var i
+    , k
     , href
     , doctype = Node.createNode(
         Node.HTML_BLOCK, {_htmlBlockType: 4, literal: this.doctype});
@@ -164,8 +167,14 @@ function head(chunk, cb) {
   }
 
   // meta elements
-  for(var k in this.meta) {
+  for(k in this.meta) {
     this.push(element(ctag('meta', {name: k, content: this.meta[k]})));
+  }
+
+  // http-equiv meta elements
+  for(k in this.equiv) {
+    this.push(element(
+      ctag('meta', {'http-equiv': k, content: this.equiv[k]})));
   }
 
   if(this.favicon) {
