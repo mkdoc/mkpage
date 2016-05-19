@@ -21,7 +21,8 @@ describe('mkpage:', function() {
       , opts = {
           input: input,
           output: output,
-          footer: 'test/fixtures/footer.md'
+          footer: 'test/fixtures/footer.md',
+          markdown: true
         };
     
     mkpage(opts);

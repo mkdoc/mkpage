@@ -69,6 +69,7 @@ var through = require('through3')
  *  @option {Array} app paths for script elements before end of body.
  *  @option {Array|String} header include files at start of body.
  *  @option {Array|String} footer include files at end of body.
+ *  @option {Boolean} markdown parse headers and footers as markdown.
  */
 function HtmlPage(opts) {
   opts = opts || {};
@@ -109,6 +110,7 @@ function HtmlPage(opts) {
 
   this.headFiles = Array.isArray(opts.header) ? opts.header : [opts.header];
   this.footFiles = Array.isArray(opts.footer) ? opts.footer : [opts.footer];
+  this.markdown = opts.markdown;
 
   // internal state
   this._header = false;
@@ -435,6 +437,14 @@ function parse(file, cb) {
     if(err) {
       return cb(err); 
     }
+
+    // not configured to parse as markdown
+    if(!scope.markdown) {
+      scope.push(element(contents)); 
+      return cb();
+    }
+
+    // parse as markdown into the stream
     var stream = ast.src('' + contents);
     stream.on('data', function(chunk) {
       // pass through data

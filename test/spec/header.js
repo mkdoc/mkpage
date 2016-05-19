@@ -21,7 +21,8 @@ describe('mkpage:', function() {
       , opts = {
           input: input,
           output: output,
-          header: 'test/fixtures/header.md'
+          header: 'test/fixtures/header.md',
+          markdown: true
         };
     
     mkpage(opts);
