@@ -67,8 +67,8 @@ var through = require('through3')
  *  @option {String} element container element name.
  *  @option {Object} attr map of attributes for the container element.
  *  @option {Array} app paths for script elements before end of body.
- *  @option {String} header include file at start of body.
- *  @option {String} footer include file at end of body.
+ *  @option {Array|String} header include files at start of body.
+ *  @option {Array|String} footer include files at end of body.
  */
 function HtmlPage(opts) {
   opts = opts || {};
@@ -107,8 +107,8 @@ function HtmlPage(opts) {
 
   this.app = opts.app || [];
 
-  this.headFile = opts.header;
-  this.footFile = opts.footer;
+  this.headFiles = Array.isArray(opts.header) ? opts.header : [opts.header];
+  this.footFiles = Array.isArray(opts.footer) ? opts.footer : [opts.footer];
 
   // internal state
   this._header = false;
@@ -266,9 +266,13 @@ function header(chunk, cb) {
   // open body
   this.push(element(tag('body', this.body)));
 
-  // parse a header file into the stream
-  if(this.headFile) {
-    this.parse(this.headFile, function(err) {
+  function it(item, cb) {
+    scope.parse(item, cb); 
+  }
+
+  // parse header files into the stream
+  if(this.headFiles.length) {
+    this.iterate(this.headFiles, it, function(err) {
       if(err) {
         return cb(err); 
       } 
@@ -312,14 +316,19 @@ function finalize(chunk, cb) {
  */
 function flush(cb) {
   var scope = this;
+
   // close container element
   if(this.element) {
     this.push(element(tag(this.element, true)));
   }
 
+  function it(item, cb) {
+    scope.parse(item, cb); 
+  }
+
   // parse a footer file into the stream
-  if(this.footFile) {
-    this.parse(this.footFile, function(err) {
+  if(this.footFiles.length) {
+    this.iterate(this.footFiles, it, function(err) {
       if(err) {
         return cb(err); 
       } 
@@ -329,6 +338,32 @@ function flush(cb) {
   }else{
     this.footer(cb);
   }
+}
+
+/**
+ *  Iterate a list in series calling the `it` function for each item 
+ *  in the list.
+ *
+ *  @private {function} iterate
+ *  @member HtmlPage
+ *
+ *  @param {Array} list array of items.
+ *  @param {Function} it iterator function.
+ *  @param {Function} cb callback function.
+ */
+function iterate(list, it, cb) {
+  var item;
+  function next(err) {
+    if(err) {
+      return cb(err); 
+    }
+    item = list.shift();
+    if(!item) {
+      return cb(); 
+    }
+    it(item, next);
+  }
+  next();
 }
 
 /**
@@ -528,5 +563,6 @@ HtmlPage.prototype.finalize = finalize;
 HtmlPage.prototype.footer = footer;
 HtmlPage.prototype.sequence = sequence;
 HtmlPage.prototype.parse = parse;
+HtmlPage.prototype.iterate = iterate;
 
 module.exports = through.transform(transform, flush, {ctor: HtmlPage})

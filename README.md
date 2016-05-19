@@ -61,7 +61,14 @@ ast.src('## Heading\n\nParagraph.')
 ## Help
 
 ```
-Usage: mkpage [options]
+Usage: mkpage [-h] [--async] [--help] [--version] [--doctype=<val>]
+              [--charset=<val>] [--lang=<val>] [--title=<val>]
+              [--style=<path...>] [--script=<path...>] [--css=<file>]
+              [--javascript=<file>] [--favicon=<path>] [--media=<val>]
+              [--html-[ATTR]=<val...>] [--meta-[NAME]=<desc...>]
+              [--equiv-[NAME]=<desc...>] [--body-[ATTR]=<val...>]
+              [--element=<name>] [--attr-[NAME]=<val...>] [--app=<path...>]
+              [--header=<file>] [--footer=<file>]
 
   Convert a document to an HTML page.
 
@@ -78,6 +85,8 @@ Options
   -m, --media=[VAL]       Set media attribute for stylesheets
   --html-[ATTR]=[VAL...]  Set attributes on the html element
   --meta-[NAME]=[DESC...] Set meta data in document head
+  --equiv-[NAME]=[DESC...] 
+                          Set http-equiv meta data in document head
   --body-[ATTR]=[VAL...]  Set attributes on the body element
   --element=[NAME]        Container element for the input document
   --attr-[NAME]=[VAL...]  Set attributes on container element
@@ -88,7 +97,7 @@ Options
   -h, --help              Display help and exit
   --version               Print the version and exit
 
-mkpage@1.0.3
+mkpage@1.0.5
 ```
 
 ## API
@@ -178,12 +187,13 @@ You can set attributes on the html and body elements using the `html` and
 * `async` Boolean=false add async attribute to script elements.
 * `html` Object map of attributes for the html element.
 * `meta` Object map of name and descriptions for meta elements.
+* `equiv` Object map of name and content for meta http-equiv elements.
 * `body` Object map of attributes for the body element.
 * `element` String container element name.
 * `attr` Object map of attributes for the container element.
 * `app` Array paths for script elements before end of body.
-* `header` String include file at start of body.
-* `footer` String include file at end of body.
+* `header` Array|String include files at start of body.
+* `footer` Array|String include files at end of body.
 
 ## License
 
@@ -191,7 +201,7 @@ MIT
 
 ---
 
-Created by [mkdoc](https://github.com/mkdoc/mkdoc) on April 18, 2016
+Created by [mkdoc](https://github.com/mkdoc/mkdoc) on May 19, 2016
 
 [mkdoc]: https://github.com/mkdoc/mkdoc
 [mkparse]: https://github.com/mkdoc/mkparse
