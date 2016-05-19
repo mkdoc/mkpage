@@ -108,8 +108,10 @@ function HtmlPage(opts) {
 
   this.app = opts.app || [];
 
-  this.headFiles = Array.isArray(opts.header) ? opts.header : [opts.header];
-  this.footFiles = Array.isArray(opts.footer) ? opts.footer : [opts.footer];
+  this.headFiles = Array.isArray(opts.header)
+    ? opts.header : (opts.header ? [opts.header] : []);
+  this.footFiles = Array.isArray(opts.footer)
+    ? opts.footer : (opts.footer ? [opts.footer] : []);
   this.markdown = opts.markdown;
 
   // internal state
@@ -440,7 +442,7 @@ function parse(file, cb) {
 
     // not configured to parse as markdown
     if(!scope.markdown) {
-      scope.push(element(contents)); 
+      scope.push(element('' + contents)); 
       return cb();
     }
 
